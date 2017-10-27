@@ -10,14 +10,29 @@
   shape-rendering: crispEdges;
 }
 
+.net{
+  fill: #DA2C38;
+}
+.interactive_art{
+  fill: #226F54;
+}
+.hybrid_art{
+  fill: #87C38F;
+}
+.net_vision{
+  fill:#F4F0BB;
+}
+.disabled{
+  fill:#EEE;
+}
 .axis text {
   font: 10px sans-serif;
 }
 /*celulas de voronoi*/
 .cells path {
   fill: none;
-  stroke: black;
-  stroke-width: 0.25;
+  /*stroke: black;
+  stroke-width: 0.25;*/
   pointer-events: all;
 }
 
@@ -25,24 +40,27 @@
   fill: red;
 }
 svg{
-  margin:20px;
+  margin: 0px 20px;
 }
 </style>
 <body>
 <svg width="960" height="200"></svg>
+<div>
+<span id="title">title</span>
+</div>
 </body>
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script>
 
 var svg = d3.select("svg"),
-    margin = {top: 40, right: 40, bottom: 40, left: 40},
+    margin = {top: 40, right: 10, bottom: 40, left: 10},
     width = svg.attr("width") - margin.left - margin.right,
     height = svg.attr("height") - margin.top - margin.bottom;
 
 var formatValue = d3.format(",d");
 
-var x = d3.scaleLog()
+var x = d3.scaleLinear()
     .range([0,width])
     .interpolate(d3.interpolateRound);
     //.rangeRound([0, width]);
@@ -50,18 +68,20 @@ var x = d3.scaleLog()
 var g = svg.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+
+
+
 //la funcio type 'limpia' los datos, dejando fuera los que interesan
-d3.csv("flare.csv", type, function(error, data) {
-  if (error) throw error;
+d3.json("graph.json", function(data) {
 
   //calcula el minimo y el máximo es lo que hace d3.extent
-  let domainExtent = d3.extent(data, function(d) { return d.value; })
+  let domainExtent = d3.extent(data, function(d) { return d.year; })
 
   x.domain(domainExtent);
 
   var simulation = d3.forceSimulation(data)
        //el x aplica la transformacion
-      .force("x", d3.forceX(function(d) { return x(d.value); }).strength(1))
+      .force("x", d3.forceX(function(d) { return x(d.year); }).strength(.5))
       .force("y", d3.forceY(height / 2))
       .force("collide", d3.forceCollide(4))
       .stop();
@@ -74,35 +94,52 @@ d3.csv("flare.csv", type, function(error, data) {
       //lo pone al suelo
       .attr("transform", "translate(0," + height + ")")
       //.attr("transform", "rotate(50deg)") //no va la rotacion
-      .call(d3.axisBottom(x).ticks(5, ".0s"));
+      .call(d3.axisBottom(x).ticks());
 
   var cell = g.append("g")
       .attr("class", "cells")
-    .selectAll("g").data(d3.voronoi()
+      .selectAll("g").data(d3.voronoi()
         //el area donde se calcula
         .extent([[-margin.left, -margin.top], [width + margin.right, height + margin.top]])
         .x(function(d) { return d.x; })
         .y(function(d) { return d.y; })
-      .polygons(data)) // se le pasan los datos
-      .enter().append("g");
+      .polygons(data)) // se le pasan los datos del json
+      .enter()
+        .append("g");
 
 
   //en este punto cell contiene todas las celuclas
-  cell.append("circle")
+  let circle = cell.append("circle")
       .attr("r", 3)
-      .attr("cx"  , function(d) { return d.data.x; })
-      .attr("cy"  , function(d) { return d.data.y; })
-      .attr("fill", 'steelblue')
+      .attr("cx"   , function(d) { return d.data.x; })
+      .attr("cy"   , function(d) { return d.data.y; })
+      .attr("class", function(d) { return d.data.category.replace(' ','_').replace('.','').toLowerCase()})
+
 //las ceclulas de voronoi
   let vcell = cell.append("path")
       .attr("d", function(d) { return "M" + d.join("L") + "Z"; });
 
   cell.append("title")
-      .text(function(d) { return d.data.id + "\n" + formatValue(d.data.value); });
-
+      .text(function(d) { return d.data.category + "\n" + d.data.title });
+  cell.attr('id',function(d) { return 'p'+d.data.id })
   cell.on('click',function(d,index){
       console.log( d.data)
+      let ids = d.data.neighbours.map(function(x){return x[0]})
+
+      cell.select('circle').classed('disabled',true)
+
+      for (neighbour of d.data.neighbours){
+
+        let id       = neighbour[0]
+        let distance = neighbour[1]
+        if( distance < 0.94){
+          d3.select('#p'+id).select('circle').classed('disabled',false)
+        }
+      }
+      d3.select(this).select('circle').classed('disabled',false)
   })
+
+  cell.on('mouseover', function(d){ $('#title').text(d.data.title)})
 
 })
 
@@ -112,6 +149,7 @@ function type(d) {
   d.value = +d.value;
   return d;
 }
+
 
 </script>
 </html>
