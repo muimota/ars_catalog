@@ -25,6 +25,7 @@
 .disabled{
   fill:#EEE;
 }
+
 .axis text {
   font: 10px sans-serif;
 }
@@ -39,6 +40,13 @@
 .cells :hover circle {
   fill: red;
 }
+
+.cells :hover circle.disabled {
+  fill:#EEE;
+  stroke: #AAA;
+
+}
+
 svg{
   margin: 0px 20px;
 }
@@ -54,7 +62,7 @@ svg{
 <script>
 
 var svg = d3.select("svg"),
-    margin = {top: 40, right: 10, bottom: 40, left: 10},
+    margin = {top: 40, right: 40, bottom: 40, left: 40},
     width = svg.attr("width") - margin.left - margin.right,
     height = svg.attr("height") - margin.top - margin.bottom;
 
@@ -83,11 +91,11 @@ d3.json("graph.json", function(data) {
        //el x aplica la transformacion
       .force("x", d3.forceX(function(d) { return x(d.year); }).strength(.5))
       .force("y", d3.forceY(height / 2))
-      .force("collide", d3.forceCollide(4))
+      .force("collide", d3.forceCollide(d => (d.prize == 'Golden Nica') ? 5:3 + 1))
       .stop();
 
-  //corre la simulación 120 tickes
-  for (var i = 0; i < 120; ++i) simulation.tick();
+  //corre la simulación 120 ticks
+  for (var i = 0; i < 220; ++i) simulation.tick();
 
   g.append("g")
       .attr("class", "axis axis--x")
@@ -108,9 +116,10 @@ d3.json("graph.json", function(data) {
         .append("g");
 
 
+
   //en este punto cell contiene todas las celuclas
   let circle = cell.append("circle")
-      .attr("r", 3)
+      .attr("r", d => (d.data.prize == 'Golden Nica') ? 5:3)
       .attr("cx"   , function(d) { return d.data.x; })
       .attr("cy"   , function(d) { return d.data.y; })
       .attr("class", function(d) { return d.data.category.replace(' ','_').replace('.','').toLowerCase()})
@@ -123,10 +132,14 @@ d3.json("graph.json", function(data) {
       .text(function(d) { return d.data.category + "\n" + d.data.title });
   cell.attr('id',function(d) { return 'p'+d.data.id })
   cell.on('click',function(d,index){
+
       console.log( d.data)
+
       let ids = d.data.neighbours.map(function(x){return x[0]})
 
       cell.select('circle').classed('disabled',true)
+
+      let nn = cell.filter(function(d) { return ids.indexOf(d.data.id) != -1 });
 
       for (neighbour of d.data.neighbours){
 
