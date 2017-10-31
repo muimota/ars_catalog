@@ -1,0 +1,46 @@
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.net{
+  fill: #DA2C38;
+}
+.interactive_art{
+  fill: #226F54;
+}
+.hybrid_art{
+  fill: #87C38F;
+}
+.net_vision{
+  fill:#F4F0BB;
+}
+.disabled{
+  fill:#EEE;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+/*celulas de voronoi*/
+.cells path {
+  fill: none;
+  /*stroke: black;
+  stroke-width: 0.25;*/
+  pointer-events: all;
+}
+circle:hover  {
+  fill: red;
+}
+
+circle.disabled:hover {
+  fill:#EEE;
+  stroke: #AAA;
+
+}
+
+svg{
+  margin: 0px 20px;
+}
