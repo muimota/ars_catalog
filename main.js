@@ -4,8 +4,6 @@ var svg = d3.select("svg"),
     width = svg.attr("width") - margin.left - margin.right,
     height = svg.attr("height") - margin.top - margin.bottom;
 
-var formatValue = d3.format(",d");
-
 var x = d3.scaleLinear()
     .range([0,width])
     .interpolate(d3.interpolateRound);
@@ -14,8 +12,14 @@ var x = d3.scaleLinear()
 var g = svg.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
+var div = g.append("text")
+    .attr("class", "tooltip")
+    .style("opacity", 0)
+
 //la funcio type 'limpia' los datos, dejando fuera los que interesan
 d3.json("graph.json",update)
+
+
 
 function update(data) {
 
@@ -63,6 +67,14 @@ function update(data) {
   let vcell = cell.append("path")
       .attr("d", function(d) { return "M" + d.join("L") + "Z"; });
 */
+let line = g.append("path")
+            .data([[[0,0],[100,100]]])
+              .attr("stroke", "black")
+              .attr('stroke-width',0.25)
+              .attr('d',d3.line()
+                          .x(d => d[0])
+                          .y(d=>d[1]))
+              //.attr("d", 'M' + ((Math.random() * 900) | 0) + ' 0 L 100 100')
 
   //en este punto cell contiene todas las celuclas
   let circle = g.selectAll("circle").data(data).enter().append('circle')
@@ -76,8 +88,14 @@ function update(data) {
       .text(function(d) { return d.category + "\n" + d.title });
   circle.attr('id',function(d) { return 'p'+d.id })
   circle.on('click',function(d,index){
-      d3.event.stopPropagation();
 
+/*
+      g.selectAll('line')
+        .data({'x1':0,'y1':0,'x2':100,'y2':200})
+*/
+      d3.event.stopPropagation()
+
+      d3.select('#title').text(d.title)
       console.log( d)
       if(d3.select('#p'+d.id).classed('disabled')){
         console.log('disabled');
@@ -92,7 +110,7 @@ function update(data) {
 
         let id       = neighbour[0]
         let distance = neighbour[1]
-        if( distance < 0.935){
+        if( distance < 0.93){
           d3.select('#p'+id).classed('disabled',false)
         }
       }
@@ -103,12 +121,34 @@ function update(data) {
       d3.text(texturl, (error,data) => d3.select('#catalog_text').text(data))
       d3.select('#catalog_text').text(t => d3.text(d3.format('06')(d.id).replace('\n','<br>')))
 
-
+      //line
+      let dataset = [[0,0],[Math.random() *100 | 0,200]]
+      console.log(dataset);
+      line.data([dataset])
+        .attr("stroke", "black")
+        .attr('stroke-width',0.25)
+        .attr('d',d3.line()
+                    .x(d => d[0])
+                    .y(d=>d[1]))
   })
 
   //disable cells on mouseclick on the svg
   svg.on('click',d => circle.classed('disabled selected',false))
-  circle.on('mouseover', d => d3.select('#title').text(d.title))
+
+  circle.on('mouseover', function(d) {
+       div.transition()
+         .duration(200)
+         .style("opacity", .9);
+       div.html(d.title)
+         .attr('x',d.x)
+         .attr('y',10)
+       })
+
+  circle.on("mouseout", function(d) {
+       div.transition()
+         .duration(200)
+         .style("opacity", 0);
+       });
 
 }
 

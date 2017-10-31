@@ -1,3 +1,6 @@
+body{
+  font-family: 'Lato', sans-serif;
+}
 .axis path,
 .axis line {
   fill: none;
@@ -48,4 +51,18 @@ circle.selected {
 
 svg{
   margin: 0px 20px;
+}
+
+#catalog_text{
+  font-size: .5em;
+}
+
+.tooltip {
+  text-align: center;
+  text-anchor: middle;
+  font-size: 8px ;
+}
+
+#artworkimage{
+  heigh:200px;
 }
