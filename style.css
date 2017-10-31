@@ -38,8 +38,13 @@ circle:hover  {
 circle.disabled:hover {
   fill:#EEE;
   stroke: #AAA;
-
 }
+circle.selected {
+  fill:red;
+  stroke: #AAA;
+  stroke-width: 2px;
+}
+
 
 svg{
   margin: 0px 20px;

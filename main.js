@@ -45,7 +45,7 @@ function update(data) {
       //lo pone al suelo
       .attr("transform", "translate(0," + height + ")")
       //.attr("transform", "rotate(50deg)") //no va la rotacion
-      .call(d3.axisBottom(x).ticks());
+      .call(d3.axisBottom(x).tickFormat(d3.format('04')).ticks());
 
 /*
   var cell = g.append("g")
@@ -86,22 +86,29 @@ function update(data) {
       }
       let ids = d.neighbours.map(function(x){return x[0]})
 
-      circle.classed('disabled',true)
+      circle.classed('disabled',true).classed('selected',false)
 
       for (neighbour of d.neighbours){
 
         let id       = neighbour[0]
         let distance = neighbour[1]
-        if( distance < 0.96){
+        if( distance < 0.935){
           d3.select('#p'+id).classed('disabled',false)
         }
       }
 
-      d3.select(this).classed('disabled',false)
+      d3.select(this).classed('disabled',false).classed('selected',true)
+      //display catalog text
+      let texturl = 'texts/' + d3.format('06')(d.id) + '.txt'
+      d3.text(texturl, (error,data) => d3.select('#catalog_text').text(data))
+      d3.select('#catalog_text').text(t => d3.text(d3.format('06')(d.id).replace('\n','<br>')))
+
+
   })
 
-  svg.on('click',d => circle.classed('disabled',false))
-  circle.on('mouseover', d => $('#title').text(d.title))
+  //disable cells on mouseclick on the svg
+  svg.on('click',d => circle.classed('disabled selected',false))
+  circle.on('mouseover', d => d3.select('#title').text(d.title))
 
 }
 
