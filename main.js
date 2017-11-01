@@ -67,15 +67,15 @@ function update(data) {
   let vcell = cell.append("path")
       .attr("d", function(d) { return "M" + d.join("L") + "Z"; });
 */
-let line = g.append("path")
-            .data([[[0,0],[100,100]]])
-              .attr("stroke", "black")
-              .attr('stroke-width',0.25)
-              .attr('d',d3.line()
-                          .x(d => d[0])
-                          .y(d=>d[1]))
-              //.attr("d", 'M' + ((Math.random() * 900) | 0) + ' 0 L 100 100')
 
+/*
+line.append("path")
+    .data([[[0,0],[100,100]]])
+      .attr("stroke", "black")
+      .attr('stroke-width',0.25)
+      .attr('d',linef)
+      */
+              //.attr("d", 'M' + ((Math.random() * 900) | 0) + ' 0 L 100 100')
   //en este punto cell contiene todas las celuclas
   let circle = g.selectAll("circle").data(data).enter().append('circle')
       .attr("r", d => (d.prize == 'Golden Nica') ? 5:3)
@@ -83,7 +83,13 @@ let line = g.append("path")
       .attr("cy"   , d => d.y )
       .attr("class", d => d.category.replace(' ','_').replace('.','').toLowerCase())
 
+  //line
+  var linef = d3.line()
+                .x(d => d.x)
+                .y(d => d.y)
 
+  let line = g.append('g')
+  
   circle.append("title")
       .text(function(d) { return d.category + "\n" + d.title });
   circle.attr('id',function(d) { return 'p'+d.id })
@@ -111,9 +117,10 @@ let line = g.append("path")
         let id       = neighbour[0]
         let distance = neighbour[1]
         if( distance < 0.93){
-          d3.select('#p'+id).classed('disabled',false)
+          let n = d3.select('#p'+id).classed('disabled',false)
         }
       }
+
 
       d3.select(this).classed('disabled',false).classed('selected',true)
       //display catalog text
@@ -121,15 +128,18 @@ let line = g.append("path")
       d3.text(texturl, (error,data) => d3.select('#catalog_text').text(data))
       d3.select('#catalog_text').text(t => d3.text(d3.format('06')(d.id).replace('\n','<br>')))
 
-      //line
-      let dataset = [[0,0],[Math.random() *100 | 0,200]]
+
+      let dataset = g.selectAll('circle:not(.disabled)').nodes().map(d => d.__data__)
       console.log(dataset);
-      line.data([dataset])
-        .attr("stroke", "black")
-        .attr('stroke-width',0.25)
-        .attr('d',d3.line()
-                    .x(d => d[0])
-                    .y(d=>d[1]))
+      //let dataset = [[0,0],[100,100]]
+
+      line.selectAll('path')
+            .data([dataset])
+            .attr('d',linef)
+            .enter().append('path')
+                .attr('class', 'line')
+                .attr('d',linef)
+            .exit().remove()
   })
 
   //disable cells on mouseclick on the svg
