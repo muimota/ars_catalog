@@ -89,7 +89,7 @@ line.append("path")
                 .y(d => d.y)
 
   let line = g.append('g')
-  
+
   circle.append("title")
       .text(function(d) { return d.category + "\n" + d.title });
   circle.attr('id',function(d) { return 'p'+d.id })
@@ -129,7 +129,7 @@ line.append("path")
       d3.select('#catalog_text').text(t => d3.text(d3.format('06')(d.id).replace('\n','<br>')))
 
 
-      let dataset = g.selectAll('circle:not(.disabled)').nodes().map(d => d.__data__)
+      let dataset = g.selectAll('circle:not(.disabled)').data()
       console.log(dataset);
       //let dataset = [[0,0],[100,100]]
 
