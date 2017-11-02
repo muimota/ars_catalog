@@ -51,31 +51,6 @@ function update(data) {
       //.attr("transform", "rotate(50deg)") //no va la rotacion
       .call(d3.axisBottom(x).tickFormat(d3.format('04')).ticks());
 
-/*
-  var cell = g.append("g")
-      .attr("class", "cells")
-      .selectAll("g").data(d3.voronoi()
-        //el area donde se calcula
-        .extent([[-margin.left, -margin.top], [width + margin.right, height + margin.top]])
-        .x(function(d) { return d.x; })
-        .y(function(d) { return d.y; })
-      .polygons(data)) // se le pasan los datos del json
-      .enter()
-        .append("g");
-
-//las ceclulas de voronoi
-  let vcell = cell.append("path")
-      .attr("d", function(d) { return "M" + d.join("L") + "Z"; });
-*/
-
-/*
-line.append("path")
-    .data([[[0,0],[100,100]]])
-      .attr("stroke", "black")
-      .attr('stroke-width',0.25)
-      .attr('d',linef)
-      */
-              //.attr("d", 'M' + ((Math.random() * 900) | 0) + ' 0 L 100 100')
   //en este punto cell contiene todas las celuclas
   let circle = g.selectAll("circle").data(data).enter().append('circle')
       .attr("r", d => (d.prize == 'Golden Nica') ? 5:3)
@@ -83,67 +58,111 @@ line.append("path")
       .attr("cy"   , d => d.y )
       .attr("class", d => d.category.replace(' ','_').replace('.','').toLowerCase())
 
-  //line
-  var linef = d3.line()
-                .x(d => d.x)
-                .y(d => d.y)
 
   let line = g.append('g')
 
   circle.append("title")
       .text(function(d) { return d.category + "\n" + d.title });
-  circle.attr('id',function(d) { return 'p'+d.id })
+  circle.attr('id',d => 'p'+d.id )
+
   circle.on('click',function(d,index){
 
-/*
-      g.selectAll('line')
-        .data({'x1':0,'y1':0,'x2':100,'y2':200})
-*/
       d3.event.stopPropagation()
 
-      d3.select('#title').text(d.title)
       console.log( d)
       if(d3.select('#p'+d.id).classed('disabled')){
         console.log('disabled');
         circle.classed('disabled',false)
         return
       }
-      let ids = d.neighbours.map(function(x){return x[0]})
+      let ids = d.neighbours.map(x => x[0])
 
       circle.classed('disabled',true).classed('selected',false)
 
-      for (neighbour of d.neighbours){
+      let global_threshold = 0.93
+      let minNeighbours = 2
+      let maxNeighbours = 5
+
+      let distances = d.neighbours.map( d => d[1]).sort()
+      let threshold = 0
+      for(let i = minNeighbours; i <= maxNeighbours && threshold <= global_threshold ; i ++ ){
+        threshold = distances[i]
+      }
+      console.log(threshold);
+      for (let neighbour of d.neighbours){
 
         let id       = neighbour[0]
         let distance = neighbour[1]
-        if( distance < 0.93){
+        if( distance < threshold){
           let n = d3.select('#p'+id).classed('disabled',false)
         }
       }
 
 
-      d3.select(this).classed('disabled',false).classed('selected',true)
       //display catalog text
+      d3.select('#title').text(d.title)
       let texturl = 'texts/' + d3.format('06')(d.id) + '.txt'
       d3.text(texturl, (error,data) => d3.select('#catalog_text').text(data))
       d3.select('#catalog_text').text(t => d3.text(d3.format('06')(d.id).replace('\n','<br>')))
 
+      //fill dataset
+      let dataset = []
+      for (let neighbour of d.neighbours){
 
-      let dataset = g.selectAll('circle:not(.disabled)').data()
+        let id       = neighbour[0]
+        let distance = neighbour[1]
+
+        if( distance < threshold ) {
+          let projData = d3.select('#p'+id).datum()
+          dataset.push({'source':d,'target':projData,'distance':distance})
+        }
+
+      }
+
       console.log(dataset);
+      //let dataset = g.selectAll('circle:not(.disabled)').data()
+
+      d3.select(this).classed('disabled',false).classed('selected',true)
+
       //let dataset = [[0,0],[100,100]]
+      let linef = function(d){
+          //angle from src to dst
+          let angle  = Math.atan2((d.target.y - d.source.y),(d.target.x - d.source.x))
+          let src = {x:d.source.x + Math.cos(angle) * 8 ,y:  d.source.y + Math.sin(angle) * 7 }
+          let dst = {x:d.target.x + Math.cos(angle + Math.PI) * 8 ,y:  d.target.y + Math.sin(angle + Math.PI ) * 7 }
+          let l = `M ${src.x} ${src.y} L ${dst.x} ${dst.y}`
+          console.log(l)
+          return l
+      }
+
+      line.selectAll('path').remove()
 
       line.selectAll('path')
-            .data([dataset])
-            .attr('d',linef)
-            .enter().append('path')
-                .attr('class', 'line')
-                .attr('d',linef)
-            .exit().remove()
-  })
+        .data(dataset)
+        .enter()
+        .append('path')
+        .attr('class', 'line')
+        .attr('d',linef)
+        .append('text')
+        .attr('class','tooltip')
+        .html("hola")
+        .attr('x',100)
+        .attr('y',10)
 
+
+      console.log(line)
+
+
+  })
   //disable cells on mouseclick on the svg
-  svg.on('click',d => circle.classed('disabled selected',false))
+  svg.on('click',d =>
+    {
+      circle.classed('disabled selected',false)
+      line.selectAll('path').remove()
+        d3.select('#title').text('')
+        d3.select('#catalog_text').text('')
+    }
+  )
 
   circle.on('mouseover', function(d) {
        div.transition()
