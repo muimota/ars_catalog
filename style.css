@@ -43,7 +43,7 @@ circle.disabled:hover {
   stroke: #AAA;
 }
 circle.selected {
-  fill:red;
+  /*fill:red;*/
   stroke: #AAA;
   stroke-width: 2px;
 }
@@ -55,17 +55,18 @@ svg{
 
 #catalog_text{
   font-size: .5em;
+  /*display: none;*/
 }
 
 .tooltip {
   text-align: center;
   text-anchor: middle;
   font-size: 8px ;
+  pointer-events: none;
 }
 
 .line{
     stroke:black;
-    stroke-width: 0.25;
     fill: none;
 }
 #artworkimage{

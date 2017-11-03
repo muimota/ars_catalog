@@ -16,6 +16,7 @@ var div = g.append("text")
     .attr("class", "tooltip")
     .style("opacity", 0)
 
+var circle
 //la funcio type 'limpia' los datos, dejando fuera los que interesan
 d3.json("graph.json",update)
 
@@ -29,20 +30,6 @@ function update(data) {
   //define el domino de x
   x.domain(domainExtent);
 
-
-  var simulation = d3.forceSimulation(data)
-       //el x aplica la transformacion al año
-       //al final cada node es atraido al centro de cada año
-      .force("x", d3.forceX(function(d) { return x(d.year); }).strength(.5))
-      .force("y", d3.forceY(height / 2))
-      //dependiendo si ha ganado un golden nica tendrá 5 o 3 de radio
-      .force("collide", d3.forceCollide(d => (d.prize == 'Golden Nica') ? 6:4 ))
-      .stop(); //para el clock tick
-
-  simulation.on('tick',x => console.log('tick'))
-  //corre la simulación 220 ticks
-  for (var i = 0; i < 210; ++i) simulation.tick();
-
   //dibuja la linea inferior
   g.append("g")
       .attr("class", "axis axis--x")
@@ -51,27 +38,58 @@ function update(data) {
       //.attr("transform", "rotate(50deg)") //no va la rotacion
       .call(d3.axisBottom(x).tickFormat(d3.format('04')).ticks());
 
-  //en este punto cell contiene todas las celuclas
-  let circle = g.selectAll("circle").data(data).enter().append('circle')
-      .attr("r", d => (d.prize == 'Golden Nica') ? 5:3)
-      .attr("cx"   , d => d.x )
-      .attr("cy"   , d => d.y )
-      .attr("class", d => d.category.replace(' ','_').replace('.','').toLowerCase())
+  data.forEach((d)=>{d.x = Math.random() * width ; d.y = height/2;})
 
+  var simulation = d3.forceSimulation(data)
+       //el x aplica la transformacion al año
+       //al final cada node es atraido al centro de cada año
+      .force("x", d3.forceX(d => x(d.year)).strength(.5))
+      .force("y", d3.forceY(height / 2))
+      //dependiendo si ha ganado un golden nica tendrá 5 o 3 de radio
+      .force("collide", d3.forceCollide(d => (d.prize == 'Golden Nica') ? 6:4 ))
+      .alpha(0.08 )
+      .alphaDecay(0.001)
+      .stop(); //para el clock tick
+
+
+  //corre la simulación 220 ticks
+  //for (var i = 0; i < 210; ++i) simulation.tick();
+  circle = g.selectAll("circle")
+  .data(data)
+  .enter()
+    .append('circle')
+    .attr('id',d => 'p'+d.id )
+    .attr("r", d => (d.prize == 'Golden Nica') ? 5:3)
+    .attr("class", d => d.category.replace(' ','_').replace('.','').toLowerCase())
+    /*.append("title")
+        .text(function(d) { return d.category + "\n" + d.title })
+*/
+
+  //en este punto cell contiene todas las celuclas
+  function updateSim(){
+
+    circle
+      .attr("cx"   , function(d) { return d.x; } )
+      .attr("cy"   , function(d) { return d.y; } )
+
+  }
+
+
+
+  simulation.on('tick',updateSim)
+  //for (var i = 0; i < 15; ++i) simulation.tick();
+  simulation.restart()
 
   let line = g.append('g')
 
-  circle.append("title")
-      .text(function(d) { return d.category + "\n" + d.title });
-  circle.attr('id',d => 'p'+d.id )
 
   circle.on('click',function(d,index){
 
       d3.event.stopPropagation()
 
-      console.log( d)
+      clearUI()
+
       if(d3.select('#p'+d.id).classed('disabled')){
-        console.log('disabled');
         circle.classed('disabled',false)
         return
       }
@@ -79,16 +97,17 @@ function update(data) {
 
       circle.classed('disabled',true).classed('selected',false)
 
-      let global_threshold = 0.93
+      let global_threshold = 0.935
       let minNeighbours = 2
       let maxNeighbours = 5
 
       let distances = d.neighbours.map( d => d[1]).sort()
       let threshold = 0
+
       for(let i = minNeighbours; i <= maxNeighbours && threshold <= global_threshold ; i ++ ){
         threshold = distances[i]
       }
-      console.log(threshold);
+
       for (let neighbour of d.neighbours){
 
         let id       = neighbour[0]
@@ -135,6 +154,8 @@ function update(data) {
           return l
       }
 
+      let w = d3.scaleLinear().domain([0.94,0.92]).range([0.25,1]).clamp([0.94,0.92])
+
       line.selectAll('path').remove()
 
       line.selectAll('path')
@@ -142,27 +163,40 @@ function update(data) {
         .enter()
         .append('path')
         .attr('class', 'line')
+        .attr('stroke-width',d=> w(d.distance))
+        .attr('opacity',d=> w(d.distance))
         .attr('d',linef)
-        .append('text')
-        .attr('class','tooltip')
-        .html("hola")
-        .attr('x',100)
-        .attr('y',10)
 
+      line.selectAll('text').remove()
 
-      console.log(line)
+      dataset = d3.selectAll('circle:not(.disabled').data()
+      line.selectAll('text')
+        .data(dataset)
+        .enter()
+          .append('text')
+          .attr('x', d => d.x)
+          .attr('y', d => d.y + 12)
+          .attr('class','tooltip')
+          .html( function(d){
+                    if(d.title.length > 15 ){
+                      return d.title.substr(0,12)+'..'
+                    }else{
+                      return d.title
+                    }})
 
+        //arrangeLabels()
 
   })
+  function clearUI(){
+
+    circle.classed('disabled selected',false)
+    line.selectAll('path').remove()
+    line.selectAll('text').remove()
+    d3.select('#title').text('')
+    d3.select('#catalog_text').text('')
+  }
   //disable cells on mouseclick on the svg
-  svg.on('click',d =>
-    {
-      circle.classed('disabled selected',false)
-      line.selectAll('path').remove()
-        d3.select('#title').text('')
-        d3.select('#catalog_text').text('')
-    }
-  )
+  svg.on('click',clearUI)
 
   circle.on('mouseover', function(d) {
        div.transition()
@@ -179,11 +213,4 @@ function update(data) {
          .style("opacity", 0);
        });
 
-}
-
-
-function type(d) {
-  if (!d.value) return;
-  d.value = +d.value;
-  return d;
 }
