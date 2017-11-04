@@ -17,10 +17,9 @@ var div = g.append("text")
     .style("opacity", 0)
 
 var circle
-//la funcio type 'limpia' los datos, dejando fuera los que interesan
+var selected = []
+
 d3.json("graph.json",update)
-
-
 
 function update(data) {
 
@@ -38,7 +37,12 @@ function update(data) {
       //.attr("transform", "rotate(50deg)") //no va la rotacion
       .call(d3.axisBottom(x).tickFormat(d3.format('04')).ticks());
 
-  data.forEach((d)=>{d.x = Math.random() * width ; d.y = height/2;})
+
+  data.forEach(function(d){
+    d.x = width /2
+    d.y = height/2;
+    d.collide = (d.prize == 'Golden Nica') ? 7:4
+  })
 
   var simulation = d3.forceSimulation(data)
        //el x aplica la transformacion al año
@@ -46,39 +50,35 @@ function update(data) {
       .force("x", d3.forceX(d => x(d.year)).strength(.5))
       .force("y", d3.forceY(height / 2))
       //dependiendo si ha ganado un golden nica tendrá 5 o 3 de radio
-      .force("collide", d3.forceCollide(d => (d.prize == 'Golden Nica') ? 6:4 ))
-      .alpha(0.08 )
-      .alphaDecay(0.001)
-      .stop(); //para el clock tick
+      .force("collide", d3.forceCollide(d => d.collide))
+      .alpha(0.35 )
+      .alphaDecay(0.01)
 
 
-  //corre la simulación 220 ticks
-  //for (var i = 0; i < 210; ++i) simulation.tick();
   circle = g.selectAll("circle")
   .data(data)
   .enter()
     .append('circle')
     .attr('id',d => 'p'+d.id )
-    .attr("r", d => (d.prize == 'Golden Nica') ? 5:3)
+    .attr("r", d => d.collide - 1)
     .attr("class", d => d.category.replace(' ','_').replace('.','').toLowerCase())
-    /*.append("title")
-        .text(function(d) { return d.category + "\n" + d.title })
-*/
 
   //en este punto cell contiene todas las celuclas
   function updateSim(){
 
     circle
-      .attr("cx"   , function(d) { return d.x; } )
-      .attr("cy"   , function(d) { return d.y; } )
+      .attr("cx" , d => d.x )
+      .attr("cy" , d => d.y )
 
+    simulation.nodes(circle.data())
+      //.attr("r"  , d => d.collide-1)
   }
 
 
 
   simulation.on('tick',updateSim)
   //for (var i = 0; i < 15; ++i) simulation.tick();
-  simulation.restart()
+
 
   let line = g.append('g')
 
@@ -88,6 +88,7 @@ function update(data) {
       d3.event.stopPropagation()
 
       clearUI()
+
 
       if(d3.select('#p'+d.id).classed('disabled')){
         circle.classed('disabled',false)
@@ -113,10 +114,23 @@ function update(data) {
         let id       = neighbour[0]
         let distance = neighbour[1]
         if( distance < threshold){
-          let n = d3.select('#p'+id).classed('disabled',false)
+          let n = d3.select('#p'+id)
+          n.classed('disabled',false)
+          n.datum().collide = 10
+          n.transition().duration(200).attr('r',10)
         }
       }
 
+      d.collide = 30
+      d3.select(this).transition().duration(200).attr('r',d.collide - 1.5)
+
+      //https://bl.ocks.org/plmrry/b9db6d47dabaff6e59f565d9287c4064
+      simulation.nodes(circle.data())
+        .force("x", d3.forceX(d => x(d.year)).strength(.5))
+        .force("y", d3.forceY(height / 2))
+        .force("collide", d3.forceCollide(d => d.collide))
+        .alpha(0.35 )
+        .restart()
 
       //display catalog text
       d3.select('#title').text(d.title)
@@ -184,16 +198,35 @@ function update(data) {
                       return d.title
                     }})
 
-        //arrangeLabels()
 
   })
+
   function clearUI(){
 
-    circle.classed('disabled selected',false)
+
     line.selectAll('path').remove()
     line.selectAll('text').remove()
+
     d3.select('#title').text('')
     d3.select('#catalog_text').text('')
+
+    data.forEach(d =>
+      d.collide = (d.prize == 'Golden Nica') ? 7:4)
+
+    g.selectAll('circle:not(.disabled)').attr('r',d => d.collide - 1 )
+
+    if( g.selectAll('circle.disabled').size() > 0 ){
+
+      simulation.nodes(circle.data())
+        .force("collide", d3.forceCollide(d => d.collide))
+        .alpha(0.35)
+        .restart()
+
+    }
+    circle.classed('disabled selected',false)
+
+
+
   }
   //disable cells on mouseclick on the svg
   svg.on('click',clearUI)

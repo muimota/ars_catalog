@@ -55,7 +55,7 @@ svg{
 
 #catalog_text{
   font-size: .5em;
-  /*display: none;*/
+  display: none;
 }
 
 .tooltip {
