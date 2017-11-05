@@ -17,7 +17,6 @@ var div = g.append("text")
     .style("opacity", 0)
 
 var circle
-var selected = []
 
 d3.json("graph.json",update)
 
@@ -69,16 +68,14 @@ function update(data) {
     circle
       .attr("cx" , d => d.x )
       .attr("cy" , d => d.y )
-
     simulation.nodes(circle.data())
-      //.attr("r"  , d => d.collide-1)
+
   }
 
 
 
   simulation.on('tick',updateSim)
   //for (var i = 0; i < 15; ++i) simulation.tick();
-
 
   let line = g.append('g')
 
@@ -224,7 +221,6 @@ function update(data) {
 
     }
     circle.classed('disabled selected',false)
-
 
 
   }
