@@ -1,3 +1,4 @@
+'use strict'
 
 var svg = d3.select("svg"),
     margin = {top: 40, right: 40, bottom: 40, left: 40},
@@ -12,7 +13,7 @@ var x = d3.scaleLinear()
 var g = svg.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-var div = g.append("text")
+var tooltip = g.append("text")
     .attr("class", "tooltip")
     .style("opacity", 0)
 
@@ -55,12 +56,13 @@ function update(data) {
 
 
   circle = g.selectAll("circle")
-  .data(data)
-  .enter()
-    .append('circle')
-    .attr('id',d => 'p'+d.id )
-    .attr("r", d => d.collide - 1)
-    .attr("class", d => d.category.replace(' ','_').replace('.','').toLowerCase())
+    .data(data)
+    .enter()
+      .append('circle')
+      .attr('id',d => 'p'+d.id )
+      .attr("r", d => d.collide - 1)
+      .attr("class", d => d.category.replace(' ','_').replace('.','').toLowerCase())
+
 
   //en este punto cell contiene todas las celuclas
   function updateSim(){
@@ -70,15 +72,18 @@ function update(data) {
       .attr("cy" , d => d.y )
     simulation.nodes(circle.data())
 
+    line.selectAll('text')
+      .attr('x', d => d.x)
+      .attr('y', d => d.y + d.collide + 6)
+
   }
 
 
 
   simulation.on('tick',updateSim)
-  //for (var i = 0; i < 15; ++i) simulation.tick();
 
   let line = g.append('g')
-
+  tooltip.raise()
 
   circle.on('click',function(d,index){
 
@@ -101,7 +106,7 @@ function update(data) {
 
       let distances = d.neighbours.map( d => d[1]).sort()
       let threshold = 0
-
+      
       for(let i = minNeighbours; i <= maxNeighbours && threshold <= global_threshold ; i ++ ){
         threshold = distances[i]
       }
@@ -149,34 +154,8 @@ function update(data) {
 
       }
 
-      console.log(dataset);
-      //let dataset = g.selectAll('circle:not(.disabled)').data()
-
       d3.select(this).classed('disabled',false).classed('selected',true)
 
-      //let dataset = [[0,0],[100,100]]
-      let linef = function(d){
-          //angle from src to dst
-          let angle  = Math.atan2((d.target.y - d.source.y),(d.target.x - d.source.x))
-          let src = {x:d.source.x + Math.cos(angle) * 8 ,y:  d.source.y + Math.sin(angle) * 7 }
-          let dst = {x:d.target.x + Math.cos(angle + Math.PI) * 8 ,y:  d.target.y + Math.sin(angle + Math.PI ) * 7 }
-          let l = `M ${src.x} ${src.y} L ${dst.x} ${dst.y}`
-          console.log(l)
-          return l
-      }
-
-      let w = d3.scaleLinear().domain([0.94,0.92]).range([0.25,1]).clamp([0.94,0.92])
-
-      line.selectAll('path').remove()
-
-      line.selectAll('path')
-        .data(dataset)
-        .enter()
-        .append('path')
-        .attr('class', 'line')
-        .attr('stroke-width',d=> w(d.distance))
-        .attr('opacity',d=> w(d.distance))
-        .attr('d',linef)
 
       line.selectAll('text').remove()
 
@@ -200,8 +179,6 @@ function update(data) {
 
   function clearUI(){
 
-
-    line.selectAll('path').remove()
     line.selectAll('text').remove()
 
     d3.select('#title').text('')
@@ -228,16 +205,16 @@ function update(data) {
   svg.on('click',clearUI)
 
   circle.on('mouseover', function(d) {
-       div.transition()
+       tooltip.transition()
          .duration(200)
          .style("opacity", .9);
-       div.html(d.title)
+       tooltip.html(d.title)
          .attr('x',d.x)
-         .attr('y',10)
+         .attr('y',4)
        })
 
   circle.on("mouseout", function(d) {
-       div.transition()
+       tooltip.transition()
          .duration(200)
          .style("opacity", 0);
        });
