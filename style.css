@@ -4,13 +4,44 @@ body{
   color: #C0C0C0;
 }
 
-h1{
+h1,h3{
   color: #EEE;
 }
 
 .container{
   width:960px;
   margin: 0 auto;
+}
+#closest{
+  display:none;
+}
+
+.infobox{
+  height:150px;
+}
+.infobox h3{
+  margin: 5px 0;
+}
+.imgbox{
+ float:left;
+ width: 100px;
+ margin: 0 10px 0 0;
+ height: 150px;
+}
+
+#catalog_text{
+  font-size: .86em;
+}
+#catalog_text a{
+  color:white;
+  font-style: italic;
+}
+
+#artworkimage{
+  width: 100px;
+  height: 100px;
+  background-position: center center;
+  background-repeat: no-repeat;
 }
 
 #closest{
@@ -84,10 +115,7 @@ svg{
   margin: 0px 20px;
 }
 
-#catalog_text{
-  font-size: .5em;
-  display: none;
-}
+
 
 .tooltip {
   

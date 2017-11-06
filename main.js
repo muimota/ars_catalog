@@ -24,6 +24,11 @@ var tooltip = g.append("text")
 
 var circle
 
+d3.select('#artworkimage').on('error', d => {
+  d3.select('#artworkimage').attr('src','noimage.jpg')
+  return false
+})
+
 d3.json("graph.json",update)
 
 function update(data) {
@@ -74,7 +79,7 @@ function update(data) {
 
   //en este punto cell contiene todas las celuclas
   function updateSim(){
-
+    
     circle
       .attr("cx" , d => d.x )
       .attr("cy" , d => d.y )
@@ -96,12 +101,15 @@ function update(data) {
   
 
   circle.on('click',function(d,index){
-
+     
+      
       if( d3.event != null ){
         d3.event.stopPropagation()
       }
-      clearUI()
-
+      clearUI();
+      //display location hash
+      location.hash = d.id + '_' + encodeURIComponent(d.title.substr(0,10))
+      
 
       if(d3.select('#p'+d.id).classed('disabled')){
         circle.classed('disabled',false)
@@ -152,14 +160,7 @@ function update(data) {
         .alpha(0.35 )
         .restart()
 
-      //display catalog text
-      location.hash = d.id + '_' + encodeURIComponent(d.title.substr(0,10))
       
-      d3.select('#closest').html(artworks.map(d => `${d.title}`).join(' - '))
-      let texturl = 'texts/' + d3.format('06')(d.id) + '.txt'
-      d3.text(texturl, (error,data) => d3.select('#catalog_text').text(data))
-      d3.select('#catalog_text').text(t => d3.text(d3.format('06')(d.id).replace('\n','<br>')))
-
       //fill dataset
       let dataset = []
       for (let neighbour of d.neighbours){
@@ -175,7 +176,6 @@ function update(data) {
       }
 
       d3.select('#p'+d.id).classed('disabled',false).classed('selected',true)
-
 
       line.selectAll('text').remove()
 
@@ -193,8 +193,26 @@ function update(data) {
                     }else{
                       return d.title
                     }})
-
-
+      
+      
+      // update UI
+      //clearUI()
+      
+      d3.select('#closest').html(artworks.map(d => `${d.title}`).join(' - '))
+      let texturl = 'texts/' + d3.format('06')(d.id) + '.txt'
+      d3.text(texturl, (error,data) => {
+      
+        let maxlength = 700 
+        let catalog_text = (data.length > maxlength) ? data.substr(0,maxlength) + '...' : data
+        catalog_text    += '<br><a target="_blank" href="http://archive.aec.at/prix/#' + d.id + '">Ars Electronica link </a>'
+        d3.select('#catalog_text').html(catalog_text)}
+      )
+        
+      let imgurl = `images/${(''+d.id).padStart(6,'0')}.jpg`;
+      d3.select('#artworkimage').attr('src',imgurl)
+      
+      d3.select('#title').text(d.title)
+     
   })
 
   function clearUI(){
@@ -204,7 +222,7 @@ function update(data) {
     d3.select('#closest').text('')
     d3.select('#title').text('')
     d3.select('#catalog_text').text('')
-
+    d3.select('#artworkimage').attr('src','noimage.jpg')
     data.forEach(d =>
       d.collide = (d.prize == 'Golden Nica') ? 7:4)
 
@@ -248,7 +266,8 @@ function update(data) {
     }
   )
   
-  circle.on('mouseover', function(d) {
+  circle.on('mouseover', d => {
+
        tooltip.transition()
          .duration(200)
          .style("opacity", .9);
