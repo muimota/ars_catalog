@@ -1,36 +1,57 @@
 body{
   font-family: 'Lato', sans-serif;
+  background: #1c1c1c;
+  color: #C0C0C0;
 }
 
+h1{
+  color: #EEE;
+}
+
+.container{
+  width:960px;
+  margin: 0 auto;
+}
+
+#closest{
+    width:100%;
+    text-align:center;
+}
 #svgview{
  border: black;
+ background: #1c1c1c;
+ margin: 0;
 }
-
+text{
+  fill:#FFF;
+  shape-rendering:crispEdges;
+}
 .axis path,
-.axis line {
-  fill: none;
-  stroke: #000;
-  shape-rendering: crispEdges;
+.axis line
+{
+  shape-rendering:crispEdges;
+  stroke: #FFF;
+  
 }
 
 .net{
   fill: #DA2C38;
 }
 .interactive_art{
-  fill: #226F54;
+  fill: #FF6F3C;
 }
 .hybrid_art{
-  fill: #87C38F;
+  fill: #FF9A3C;
 }
 .net_vision{
-  fill:#F4F0BB;
+  fill:#E8295B;
 }
 .starts_prize{
   fill:#FFCC00;
 }
 .disabled{
   /*fill:#EEE;*/
-  opacity: 0.25;
+  opacity: 0.65;
 }
 
 .axis text {
@@ -69,9 +90,10 @@ svg{
 }
 
 .tooltip {
+  
   text-align: center;
   text-anchor: middle;
-  font-size: 10px ;
+  font-size: 12px ;
   pointer-events: none;
 }
 

@@ -4,8 +4,19 @@
 <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <body>
-<svg id='svgview' width='900' height='400' ></svg>
-<div>
+
+<div class='container'>
+<h1>Ars Explorer</h1>
+<p>
+All the artworks description have been processed by a ML algorithm establishing a relationship of 'distance' between the different artworks.
+</p>
+<p>
+  <li>Each circle is an artwork that took part in the ars electronica festival, the slightly bigger ones won the Golden Nica</li>
+  <li>When clicking on an artwork the most similar will be highlighted</li>
+</p>
+<svg id='svgview' width='960' height='400' ></svg>
+
+<div id="closest"></div>
 <span id="title"></span>
 <img id="artworkimage"></img>
 <div id="catalog_text"></div>
@@ -14,6 +25,4 @@
 <script src="https://d3js.org/d3.v4.min.js"></script>
 <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
 <script src="main.js"></script>
-<script>
-</script>
 </html>

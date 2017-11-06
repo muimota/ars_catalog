@@ -1,7 +1,7 @@
 'use strict'
 
 var svg = d3.select("#svgview"),
-    margin = {top: 40, right: 40, bottom: 40, left: 90},
+    margin = {top: 40, right: 40, bottom: 40, left: 80},
     width = svg.attr("width") - margin.left - margin.right,
     height = svg.attr("height") - margin.top - margin.bottom;
 
@@ -10,13 +10,11 @@ var x = d3.scaleLinear()
 
 
 //https://bl.ocks.org/mbostock/3371592    
-var categories = ['.net','Hybrid Art','Interactive Art','Starts Prize','Net Vision' ]
-
+var categories = ['Starts Prize','Hybrid Art','Interactive Art','Net Vision','.net' ]
 var y = d3.scalePoint()
     .domain(categories)
     .range([height/9, 8*height/9])
     
-debugger 
 var g = svg.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -35,6 +33,7 @@ function update(data) {
   
   //define el domino de x
   x.domain(domainExtent);
+ 
   
   //dibuja la linea inferior
   g.append("g")
@@ -93,11 +92,14 @@ function update(data) {
   tooltip.raise()
   
   clearUI()
+  
+  
 
   circle.on('click',function(d,index){
 
-      d3.event.stopPropagation()
-
+      if( d3.event != null ){
+        d3.event.stopPropagation()
+      }
       clearUI()
 
 
@@ -119,21 +121,30 @@ function update(data) {
       for(let i = minNeighbours; i <= maxNeighbours && threshold <= global_threshold ; i ++ ){
         threshold = distances[i]
       }
-
+      
+      let artworks = [{'title':d.title,'id':d.id}] 
+      let collide  = 10
       for (let neighbour of d.neighbours){
 
         let id       = neighbour[0]
         let distance = neighbour[1]
         if( distance < threshold){
+        
           let n = d3.select('#p'+id)
+          let datum = n.datum()
           n.classed('disabled',false)
-          n.datum().collide = 10
-          n.transition().duration(200).attr('r',10)
+          datum.collide = collide
+          n.transition().duration(200).attr('r',collide)
+          
+          collide = Math.max(5,collide*0.75)
+          
+          artworks.push({ 'title':datum.title,'id':datum.id})
+          
         }
       }
 
       d.collide = 30
-      d3.select(this).transition().duration(200).attr('r',d.collide - 1.5)
+      d3.select('#p'+d.id).transition().duration(200).attr('r',d.collide - 1.5).attr
 
       //https://bl.ocks.org/plmrry/b9db6d47dabaff6e59f565d9287c4064
       simulation.nodes(circle.data())
@@ -142,7 +153,9 @@ function update(data) {
         .restart()
 
       //display catalog text
-      d3.select('#title').text(d.title)
+      location.hash = d.id + '_' + encodeURIComponent(d.title.substr(0,10))
+      
+      d3.select('#closest').html(artworks.map(d => `${d.title}`).join(' - '))
       let texturl = 'texts/' + d3.format('06')(d.id) + '.txt'
       d3.text(texturl, (error,data) => d3.select('#catalog_text').text(data))
       d3.select('#catalog_text').text(t => d3.text(d3.format('06')(d.id).replace('\n','<br>')))
@@ -161,7 +174,7 @@ function update(data) {
 
       }
 
-      d3.select(this).classed('disabled',false).classed('selected',true)
+      d3.select('#p'+d.id).classed('disabled',false).classed('selected',true)
 
 
       line.selectAll('text').remove()
@@ -187,7 +200,8 @@ function update(data) {
   function clearUI(){
 
     line.selectAll('text').remove()
-
+    
+    d3.select('#closest').text('')
     d3.select('#title').text('')
     d3.select('#catalog_text').text('')
 
@@ -215,16 +229,32 @@ function update(data) {
       .alphaDecay(0.01)
 
   }
+  
+   
+  if( location.hash.length != '' ){
+    let id = location.hash.split('_')[0].substr(1)
+    let node = d3.select('#p'+id)
+    node.on('click')(node.datum(),0)
+  }
+  
   //disable cells on mouseclick on the svg
-  svg.on('click',clearUI)
-
+  svg.on('click',(d,index) =>
+    {
+      //https://stackoverflow.com/a/28155967
+      history.replaceState({}, document.title, ".");  
+      d3.event.stopPropagation()
+      clearUI()
+      
+    }
+  )
+  
   circle.on('mouseover', function(d) {
        tooltip.transition()
          .duration(200)
          .style("opacity", .9);
        tooltip.html(d.title)
          .attr('x',d.x)
-         .attr('y',4)
+         .attr('y',0)
        })
 
   circle.on("mouseout", function(d) {
