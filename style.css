@@ -1,6 +1,11 @@
 body{
   font-family: 'Lato', sans-serif;
 }
+
+#svgview{
+ border: black;
+}
+
 .axis path,
 .axis line {
   fill: none;
@@ -20,8 +25,12 @@ body{
 .net_vision{
   fill:#F4F0BB;
 }
+.starts_prize{
+  fill:#FFCC00;
+}
 .disabled{
-  fill:#EEE;
+  /*fill:#EEE;*/
+  opacity: 0.25;
 }
 
 .axis text {
@@ -35,7 +44,8 @@ body{
   pointer-events: all;
 }
 circle:hover  {
-  fill: red;
+  stroke: #AAA;
+  stroke-width: 2px;
 }
 
 circle.disabled:hover {
@@ -61,7 +71,7 @@ svg{
 .tooltip {
   text-align: center;
   text-anchor: middle;
-  font-size: 8px ;
+  font-size: 10px ;
   pointer-events: none;
 }
 

@@ -1,15 +1,22 @@
 'use strict'
 
-var svg = d3.select("svg"),
-    margin = {top: 40, right: 40, bottom: 40, left: 40},
+var svg = d3.select("#svgview"),
+    margin = {top: 40, right: 40, bottom: 40, left: 90},
     width = svg.attr("width") - margin.left - margin.right,
     height = svg.attr("height") - margin.top - margin.bottom;
 
 var x = d3.scaleLinear()
-    .range([0,width])
-    .interpolate(d3.interpolateRound);
-    //.rangeRound([0, width]);
+    .range([30,width])
 
+
+//https://bl.ocks.org/mbostock/3371592    
+var categories = ['.net','Hybrid Art','Interactive Art','Starts Prize','Net Vision' ]
+
+var y = d3.scalePoint()
+    .domain(categories)
+    .range([height/9, 8*height/9])
+    
+debugger 
 var g = svg.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -25,10 +32,10 @@ function update(data) {
 
   //calcula el minimo y el máximo es lo que hace d3.extent
   let domainExtent = d3.extent(data, function(d) { return d.year; })
-
+  
   //define el domino de x
   x.domain(domainExtent);
-
+  
   //dibuja la linea inferior
   g.append("g")
       .attr("class", "axis axis--x")
@@ -36,23 +43,25 @@ function update(data) {
       .attr("transform", "translate(0," + height + ")")
       //.attr("transform", "rotate(50deg)") //no va la rotacion
       .call(d3.axisBottom(x).tickFormat(d3.format('04')).ticks());
+  
+  g.append("g")
+      .attr("class", "axis axis--x")
+      //lo pone al suelo
+     // .attr("transform", "translate(0," + height + ")")
+      //.attr("transform", "rotate(50deg)") //no va la rotacion
+      .call(d3.axisLeft(y))
 
 
   data.forEach(function(d){
     d.x = width /2
     d.y = height/2;
-    d.collide = (d.prize == 'Golden Nica') ? 7:4
+    d.collide = (d.prize == 'Golden Nica') ? 10:6
   })
 
   var simulation = d3.forceSimulation(data)
        //el x aplica la transformacion al año
        //al final cada node es atraido al centro de cada año
-      .force("x", d3.forceX(d => x(d.year)).strength(.5))
-      .force("y", d3.forceY(height / 2))
-      //dependiendo si ha ganado un golden nica tendrá 5 o 3 de radio
-      .force("collide", d3.forceCollide(d => d.collide))
-      .alpha(0.35 )
-      .alphaDecay(0.01)
+     
 
 
   circle = g.selectAll("circle")
@@ -78,12 +87,12 @@ function update(data) {
 
   }
 
-
-
   simulation.on('tick',updateSim)
 
   let line = g.append('g')
   tooltip.raise()
+  
+  clearUI()
 
   circle.on('click',function(d,index){
 
@@ -128,8 +137,6 @@ function update(data) {
 
       //https://bl.ocks.org/plmrry/b9db6d47dabaff6e59f565d9287c4064
       simulation.nodes(circle.data())
-        .force("x", d3.forceX(d => x(d.year)).strength(.5))
-        .force("y", d3.forceY(height / 2))
         .force("collide", d3.forceCollide(d => d.collide))
         .alpha(0.35 )
         .restart()
@@ -198,7 +205,14 @@ function update(data) {
 
     }
     circle.classed('disabled selected',false)
-
+    
+    simulation
+      .force("x", d3.forceX(d => x(d.year)).strength(.5))
+      .force("y", d3.forceY(d => y(d.category)))
+      //dependiendo si ha ganado un golden nica tendrá 5 o 3 de radio
+      .force("collide", d3.forceCollide(d => d.collide))
+      .alpha(0.35 )
+      .alphaDecay(0.01)
 
   }
   //disable cells on mouseclick on the svg
