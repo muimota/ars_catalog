@@ -9,12 +9,12 @@ var x = d3.scaleLinear()
     .range([30,width])
 
 
-//https://bl.ocks.org/mbostock/3371592    
+//https://bl.ocks.org/mbostock/3371592
 var categories = ['Starts Prize','Hybrid Art','Interactive Art','Net Vision','.net' ]
 var y = d3.scalePoint()
     .domain(categories)
     .range([height/9, 8*height/9])
-    
+
 var g = svg.append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
@@ -24,6 +24,9 @@ var tooltip = g.append("text")
 
 var circle
 
+var status = 0 //0 displays all projects , 1 one project is selected
+
+//fix in case image is not avaliable
 d3.select('#artworkimage').on('error', d => {
   d3.select('#artworkimage').attr('src','noimage.jpg')
   return false
@@ -35,11 +38,11 @@ function update(data) {
 
   //calcula el minimo y el máximo es lo que hace d3.extent
   let domainExtent = d3.extent(data, function(d) { return d.year; })
-  
+
   //define el domino de x
   x.domain(domainExtent);
- 
-  
+
+
   //dibuja la linea inferior
   g.append("g")
       .attr("class", "axis axis--x")
@@ -47,7 +50,7 @@ function update(data) {
       .attr("transform", "translate(0," + height + ")")
       //.attr("transform", "rotate(50deg)") //no va la rotacion
       .call(d3.axisBottom(x).tickFormat(d3.format('04')).ticks());
-  
+
   g.append("g")
       .attr("class", "axis axis--x")
       //lo pone al suelo
@@ -65,7 +68,7 @@ function update(data) {
   var simulation = d3.forceSimulation(data)
        //el x aplica la transformacion al año
        //al final cada node es atraido al centro de cada año
-     
+
 
 
   circle = g.selectAll("circle")
@@ -79,7 +82,7 @@ function update(data) {
 
   //en este punto cell contiene todas las celuclas
   function updateSim(){
-    
+
     circle
       .attr("cx" , d => d.x )
       .attr("cy" , d => d.y )
@@ -95,26 +98,35 @@ function update(data) {
 
   let line = g.append('g')
   tooltip.raise()
-  
+
   clearUI()
-  
-  
+
+
 
   circle.on('click',function(d,index){
-     
-      
+
+
+
       if( d3.event != null ){
         d3.event.stopPropagation()
       }
-      clearUI();
+      //
+
       //display location hash
       location.hash = d.id + '_' + encodeURIComponent(d.title.substr(0,10))
-      
 
-      if(d3.select('#p'+d.id).classed('disabled')){
-        circle.classed('disabled',false)
-        return
+      let node = d3.select(this)
+      if(status == 1 && !node.classed('disabled')){
+        circle.classed('selected',false)
+        node.classed('selected',true)
+        updateInfo(d)
+
+        return;
       }
+
+      clearUI();
+      status = 1
+
       let ids = d.neighbours.map(x => x[0])
 
       circle.classed('disabled',true).classed('selected',false)
@@ -125,29 +137,29 @@ function update(data) {
 
       let distances = d.neighbours.map( d => d[1]).sort()
       let threshold = 0
-      
+
       for(let i = minNeighbours; i <= maxNeighbours && threshold <= global_threshold ; i ++ ){
         threshold = distances[i]
       }
-      
-      let artworks = [{'title':d.title,'id':d.id}] 
+
+      let artworks = [{'title':d.title,'id':d.id}]
       let collide  = 10
       for (let neighbour of d.neighbours){
 
         let id       = neighbour[0]
         let distance = neighbour[1]
         if( distance < threshold){
-        
+
           let n = d3.select('#p'+id)
           let datum = n.datum()
           n.classed('disabled',false)
           datum.collide = collide
           n.transition().duration(200).attr('r',collide)
-          
+
           collide = Math.max(5,collide*0.75)
-          
+
           artworks.push({ 'title':datum.title,'id':datum.id})
-          
+
         }
       }
 
@@ -160,7 +172,7 @@ function update(data) {
         .alpha(0.35 )
         .restart()
 
-      
+
       //fill dataset
       let dataset = []
       for (let neighbour of d.neighbours){
@@ -193,32 +205,33 @@ function update(data) {
                     }else{
                       return d.title
                     }})
-      
-      
+
+
       // update UI
-      //clearUI()
-      
+
       d3.select('#closest').html(artworks.map(d => `${d.title}`).join(' - '))
       let texturl = 'texts/' + d3.format('06')(d.id) + '.txt'
       d3.text(texturl, (error,data) => {
-      
-        let maxlength = 700 
+
+        let maxlength = 700
         let catalog_text = (data.length > maxlength) ? data.substr(0,maxlength) + '...' : data
         catalog_text    += '<br><a target="_blank" href="http://archive.aec.at/prix/#' + d.id + '">Ars Electronica link </a>'
         d3.select('#catalog_text').html(catalog_text)}
       )
-        
+
       let imgurl = `images/${(''+d.id).padStart(6,'0')}.jpg`;
       d3.select('#artworkimage').attr('src',imgurl)
-      
+
       d3.select('#title').text(d.title)
-     
+
   })
 
   function clearUI(){
 
+    status = 0
+
     line.selectAll('text').remove()
-    
+
     d3.select('#closest').text('')
     d3.select('#title').text('')
     d3.select('#catalog_text').text('')
@@ -237,7 +250,7 @@ function update(data) {
 
     }
     circle.classed('disabled selected',false)
-    
+
     simulation
       .force("x", d3.forceX(d => x(d.year)).strength(.5))
       .force("y", d3.forceY(d => y(d.category)))
@@ -247,25 +260,42 @@ function update(data) {
       .alphaDecay(0.01)
 
   }
-  
-   
+
+  function updateInfo(d){
+    // update UI
+
+    let texturl = 'texts/' + d3.format('06')(d.id) + '.txt'
+    d3.text(texturl, (error,data) => {
+
+      let maxlength = 700
+      let catalog_text = (data.length > maxlength) ? data.substr(0,maxlength) + '...' : data
+      catalog_text    += '<br><a target="_blank" href="http://archive.aec.at/prix/#' + d.id + '">Ars Electronica link </a>'
+      d3.select('#catalog_text').html(catalog_text)}
+    )
+
+    let imgurl = `images/${(''+d.id).padStart(6,'0')}.jpg`;
+    d3.select('#artworkimage').attr('src',imgurl)
+
+    d3.select('#title').text(d.title)
+  }
+
   if( location.hash.length != '' ){
     let id = location.hash.split('_')[0].substr(1)
     let node = d3.select('#p'+id)
     node.on('click')(node.datum(),0)
   }
-  
+
   //disable cells on mouseclick on the svg
   svg.on('click',(d,index) =>
     {
       //https://stackoverflow.com/a/28155967
-      history.replaceState({}, document.title, ".");  
+      history.replaceState({}, document.title, ".");
       d3.event.stopPropagation()
       clearUI()
-      
+
     }
   )
-  
+
   circle.on('mouseover', d => {
 
        tooltip.transition()
