@@ -2,15 +2,17 @@
 <meta charset="utf-8">
 <html>
 <link href="https://fonts.googleapis.com/css?family=Lato" rel="stylesheet">
+<link href='https://fonts.googleapis.com/css?family=Lato:100' rel='stylesheet' type='text/css'>
+<link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <body>
 
 <div class='container'>
   <h1>Ars Explorer</h1>
-  <!-- 
+  <!--
   <p>
   All the artworks description have been processed by a ML algorithm establishing a relationship of 'distance' between the different artworks.
-  Each circle is an artwork that took part in the ars electronica festival, the slightly bigger ones won the Golden Nica. 
+  Each circle is an artwork that took part in the ars electronica festival, the slightly bigger ones won the Golden Nica.
   When clicking on an artwork the most similar will be highlighted.
   </p>
  -->
@@ -19,10 +21,10 @@
   <div>
     <div class="imgbox">
       <img id="artworkimage" onerror="this.onerror=null;this.src='noimage.jpg';"></img>
-      
+
     </div>
     <div class="infobox" >
-      <h3  id="title">hola</h3>
+      <div class="art-title"><span  id="title">hola</span><span id="prizes"></span></div>
       <div id="catalog_text"></div>
     </div>
   </div>

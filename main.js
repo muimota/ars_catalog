@@ -1,7 +1,7 @@
 'use strict'
 
 var svg = d3.select("#svgview"),
-    margin = {top: 40, right: 40, bottom: 40, left: 80},
+    margin = {top: 20, right: 40, bottom: 40, left: 80},
     width = svg.attr("width") - margin.left - margin.right,
     height = svg.attr("height") - margin.top - margin.bottom;
 
@@ -223,6 +223,8 @@ function update(data) {
       d3.select('#artworkimage').attr('src',imgurl)
 
       d3.select('#title').text(d.title)
+      d3.select('#prizes').text(d.prize + ' ' +d.year)
+
 
   })
 
@@ -234,6 +236,7 @@ function update(data) {
 
     d3.select('#closest').text('')
     d3.select('#title').text('')
+    d3.select('#prizes').text('')
     d3.select('#catalog_text').text('')
     d3.select('#artworkimage').attr('src','noimage.jpg')
     data.forEach(d =>
@@ -269,7 +272,7 @@ function update(data) {
 
       let maxlength = 700
       let catalog_text = (data.length > maxlength) ? data.substr(0,maxlength) + '...' : data
-      catalog_text    += '<br><a target="_blank" href="http://archive.aec.at/prix/#' + d.id + '">Ars Electronica link </a>'
+      catalog_text    += '<a target="_blank" href="http://archive.aec.at/prix/#' + d.id + '">Ars Electronica link </a>'
       d3.select('#catalog_text').html(catalog_text)}
     )
 

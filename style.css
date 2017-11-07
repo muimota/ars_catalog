@@ -1,13 +1,27 @@
 body{
   font-family: 'Lato', sans-serif;
+  font-weight: 400;
   background: #1c1c1c;
   color: #C0C0C0;
 }
 
-h1,h3{
+h1{
   color: #EEE;
+  margin: .7em 0em 0em 1em;
 }
-
+.art-title{
+  margin-bottom: 12px;
+}
+#title{
+  font-weight:200;
+  color:#EEE;
+  font-size: 1.8em;
+  margin-bottom: 40px;
+}
+#prizes{
+  font-weight:100;
+  margin-left: 1em;
+}
 .container{
   width:960px;
   margin: 0 auto;
@@ -17,7 +31,7 @@ h1,h3{
 }
 
 .infobox{
-  height:150px;
+  height:180px;
 }
 .infobox h3{
   margin: 5px 0;
@@ -26,15 +40,19 @@ h1,h3{
  float:left;
  width: 100px;
  margin: 0 10px 0 0;
- height: 150px;
+ height: 180px;
 }
 
 #catalog_text{
+  font-weight: 300;
   font-size: .86em;
+  line-height: 1.25em;
 }
 #catalog_text a{
   color:white;
+  font-weight: 400;
   font-style: italic;
+  text-decoration: none;
 }
 
 #artworkimage{
@@ -62,7 +80,7 @@ text{
 {
   shape-rendering:crispEdges;
   stroke: #FFF;
-  
+
 }
 
 .net{
@@ -118,7 +136,7 @@ svg{
 
 
 .tooltip {
-  
+
   text-align: center;
   text-anchor: middle;
   font-size: 12px ;
