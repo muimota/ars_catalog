@@ -36,6 +36,36 @@ d3.json("graph.json",update)
 
 function update(data) {
 
+
+
+  var options = {
+        data: data,
+        maxNumberOfElements: 8,
+
+        getValue: function(d){
+                    if(d.title.length > 30 ){
+                      return d.title.substr(0,12)+'..'
+                    }else{
+                      return d.title
+                    }
+                  },
+
+      	list: {
+      		match: {
+      			enabled: true
+      		},
+          onChooseEvent:function(){
+            let d = $("#artsearch").getSelectedItemData()
+            $("#artsearch").val('').blur()
+            circle.on('click')(d,0)
+          }
+      	},
+        theme: "ars"
+
+};
+
+$("#artsearch").easyAutocomplete(options);
+
   //calcula el minimo y el máximo es lo que hace d3.extent
   let domainExtent = d3.extent(data, function(d) { return d.year; })
 
@@ -99,12 +129,11 @@ function update(data) {
   let line = g.append('g')
   tooltip.raise()
 
-  clearUI()
+  clearUI(false)
 
 
 
   circle.on('click',function(d,index){
-
 
 
       if( d3.event != null ){
@@ -214,21 +243,23 @@ function update(data) {
 
       // update UI
 
-      d3.select('#closest').html(artworks.map(d => `${d.title}`).join(' - '))  
+      d3.select('#closest').html(artworks.map(d => `${d.title}`).join(' - '))
       updateInfo(d)
 
   })
 
-  function clearUI(){
+  function clearUI(clearText = true){
 
 
     line.selectAll('text').remove()
 
-    d3.select('#closest').text('')
-    d3.select('#title').text('')
-    d3.select('#prizes').text('')
-    d3.select('#catalog_text').text('')
-    d3.select('#artworkimage').attr('src','noimage.jpg')
+    if(clearText){
+      d3.select('#closest').text('')
+      d3.select('#title').text('')
+      d3.select('#prizes').text('')
+      d3.select('#catalog_text').text('')
+      d3.select('#artworkimage').attr('src','noimage.jpg')
+    }
     data.forEach(d =>
       d.collide = (d.prize == 'Golden Nica') ? 7:4)
 

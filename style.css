@@ -1,13 +1,75 @@
 body{
   font-family: 'Lato', sans-serif;
-  font-weight: 400;
+  font-weight: 200;
   background: #1c1c1c;
   color: #C0C0C0;
 }
 
-h1{
+div.navigator{
+  margin: 30px 0px;
+}
+div.search{
+  margin-top: 2px;
+  float:right;
+}
+/*EASYAUTOCOMPLETE*/
+
+.easy-autocomplete.eac-ars {
+  font-family: "Roboto", "Helvetica Neue",Helvetica,Arial,sans-serif;
+
+}
+.easy-autocomplete.eac-ars input {
+  border: thin solid #666;
+  border-radius: 0;
+  color: #999;
+  background: #222;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 300;
+  margin: 0;
+  min-width: 200px;
+  padding: 5px 5px 5px 5px;
+  text-align: right;
+}
+.easy-autocomplete.eac-ars ul {
+  border-color: #7f8c8d;
+  border-top: 0;
+  box-shadow: none;
+  top: 0;
+}
+.easy-autocomplete.eac-ars ul li, .easy-autocomplete.eac-ars ul .eac-category {
+  border-color: #7f8c8d;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 200;
+  padding: 6px 12px;
+  transition: all 0.4s ease 0s;
+  background-color: #333;
+  color:#888;
+  text-align: right;
+}
+.easy-autocomplete.eac-ars ul li *, .easy-autocomplete.eac-ars ul .eac-category * {
+  font-weight: 300;
+
+}
+.easy-autocomplete.eac-ars ul li.selected, .easy-autocomplete.eac-ars ul .eac-category.selected {
+  background-color: #222;
+  font-weight: 300;
+}
+.easy-autocomplete.eac-ars ul li b, .easy-autocomplete.eac-ars ul .eac-category b {
+  font-weight: 600;
+  color: #888;
+}
+
+.navigator h1{
   color: #EEE;
-  margin: .7em 0em 0em 1em;
+  font-weight: 200;
+  margin: 0em 0em 0em 1em;
+  width: 300px;
+  display:inline-block;
+}
+.subtitle{
+  margin-left: 2em;
 }
 .art-title{
   margin-bottom: 12px;
@@ -43,18 +105,28 @@ h1{
  height: 180px;
 }
 
-#catalog_text{
+#catalog_text, footer{
   font-weight: 300;
   font-size: .86em;
   line-height: 1.25em;
 }
-#catalog_text a{
+.project_desc{
+  margin-left: 3em;
+  font-weight: 300;
+  font-size: .9em;
+  line-height: 1.5em;
+}
+
+#catalog_text a, footer a{
   color:white;
   font-weight: 400;
   font-style: italic;
   text-decoration: none;
 }
-
+footer{
+  float: right;
+  font-size: 0.6em;
+}
 #artworkimage{
   width: 100px;
   height: 100px;
