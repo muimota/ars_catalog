@@ -24,7 +24,7 @@ var tooltip = g.append("text")
 
 var circle
 
-var status = 0 //0 displays all projects , 1 one project is selected
+var selected = null //0 displays all projects , 1 one project is selected
 
 //fix in case image is not avaliable
 d3.select('#artworkimage').on('error', d => {
@@ -116,16 +116,21 @@ function update(data) {
       location.hash = d.id + '_' + encodeURIComponent(d.title.substr(0,10))
 
       let node = d3.select(this)
-      if(status == 1 && !node.classed('disabled')){
+
+      if(selected != null && selected.node() != node.node() && !node.classed('disabled')){
+
         circle.classed('selected',false)
         node.classed('selected',true)
         updateInfo(d)
+        selected = node
 
         return;
+
       }
 
+      selected = node
       clearUI();
-      status = 1
+
 
       let ids = d.neighbours.map(x => x[0])
 
@@ -209,28 +214,13 @@ function update(data) {
 
       // update UI
 
-      d3.select('#closest').html(artworks.map(d => `${d.title}`).join(' - '))
-      let texturl = 'texts/' + d3.format('06')(d.id) + '.txt'
-      d3.text(texturl, (error,data) => {
-
-        let maxlength = 700
-        let catalog_text = (data.length > maxlength) ? data.substr(0,maxlength) + '...' : data
-        catalog_text    += '<br><a target="_blank" href="http://archive.aec.at/prix/#' + d.id + '">Ars Electronica link </a>'
-        d3.select('#catalog_text').html(catalog_text)}
-      )
-
-      let imgurl = `images/${(''+d.id).padStart(6,'0')}.jpg`;
-      d3.select('#artworkimage').attr('src',imgurl)
-
-      d3.select('#title').text(d.title)
-      d3.select('#prizes').text(d.prize + ' ' +d.year)
-
+      d3.select('#closest').html(artworks.map(d => `${d.title}`).join(' - '))  
+      updateInfo(d)
 
   })
 
   function clearUI(){
 
-    status = 0
 
     line.selectAll('text').remove()
 
@@ -265,14 +255,14 @@ function update(data) {
   }
 
   function updateInfo(d){
-    // update UI
 
+    // update UI
     let texturl = 'texts/' + d3.format('06')(d.id) + '.txt'
     d3.text(texturl, (error,data) => {
 
       let maxlength = 700
-      let catalog_text = (data.length > maxlength) ? data.substr(0,maxlength) + '...' : data
-      catalog_text    += '<a target="_blank" href="http://archive.aec.at/prix/#' + d.id + '">Ars Electronica link </a>'
+      let catalog_text = '<p>' + (data.length > maxlength) ? data.substr(0,maxlength) + '...' : data + '</p>'
+      catalog_text    += '<p><a target="_blank" href="http://archive.aec.at/prix/#' + d.id + '">Ars Electronica link </a></p>'
       d3.select('#catalog_text').html(catalog_text)}
     )
 
@@ -280,6 +270,8 @@ function update(data) {
     d3.select('#artworkimage').attr('src',imgurl)
 
     d3.select('#title').text(d.title)
+    d3.select('#prizes').text(d.prize + ' ' +d.year)
+
   }
 
   if( location.hash.length != '' ){
@@ -295,7 +287,7 @@ function update(data) {
       history.replaceState({}, document.title, ".");
       d3.event.stopPropagation()
       clearUI()
-
+      selected = null
     }
   )
 
