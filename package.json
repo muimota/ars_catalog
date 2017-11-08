@@ -1,0 +1,30 @@
+{
+  "name": "ars_explorer",
+  "version": "0.0.1",
+  "description": "A machine learning powered experiment that finds 'connections' between artworks from the Ars Electronica Archive. ",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/muimota/ars_catalog.git"
+  },
+  "keywords": [
+    "d3",
+    "visualization"
+  ],
+  "author": "martin@muimota.net",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/muimota/ars_catalog/issues"
+  },
+  "homepage": "https://github.com/muimota/ars_catalog#readme",
+  "dependencies": {
+    "d3": "^4.11.0",
+    "easy-autocomplete": "^1.3.5",
+    "font-awesome": "^4.7.0",
+    "jquery": "^3.2.1"
+  },
+  "devDependencies": {}
+}
