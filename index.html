@@ -37,22 +37,20 @@
 <div class='container'>
   <div class="navigator">
     <h1>Ars Explorer</h1>
-    <div class="search">
-      <input id="artsearch" type="text" class="searchTerm" placeholder="SEARCH">
-   </div>
+    <div class="social">
+      <a href="https://github.com/muimota"></s><i class="fa fa-github fa-lg" aria-hidden="true"></i></a>
+      <a href="https://twitter.com/muimota"></s><i class="fa fa-twitter  fa-lg" aria-hidden="true"></i></a>
+      <a href="http://martinnadal.eu"></s><i class="fa fa-info-circle  fa-lg" aria-hidden="true"></i></a>
+    </div>
   </div>
   <p class="project_desc">
     A machine learning powered experiment that finds 'connections' between artworks from the Ars Electronica Archive.
     Each circle is an artwork that took part in the ars electronica festival, the slightly bigger ones won the Golden Nica.
     When clicking on an artwork the most similar artworks will be highlighted.<br>
   </p>
-  <!--
-  <p>
-  All the artworks description have been processed by a ML algorithm establishing a relationship of 'distance' between the different artworks.
-  Each circle is an artwork that took part in the ars electronica festival, the slightly bigger ones won the Golden Nica.
-  When clicking on an artwork the most similar will be highlighted.
-  </p>
- -->
+  <div class="search">
+      <input id="artsearch" type="text" class="searchTerm" placeholder="SEARCH">
+   </div>
   <div id="closest"></div>
   <svg id='svgview' width='960' height='400' ></svg>
   <div>

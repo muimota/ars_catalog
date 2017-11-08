@@ -1,16 +1,33 @@
 body{
-  font-family: 'Lato', sans-serif;
-  font-weight: 200;
+  font-family: Helvetica, sans-serif;
+  font-weight: 300;
   background: #1c1c1c;
-  color: #C0C0C0;
+  color: #AAA;
 }
 
 div.navigator{
   margin: 30px 0px;
 }
-div.search{
-  margin-top: 2px;
+
+div.social{
   float:right;
+}
+
+div.social a{
+  margin: 0 5px;
+}
+
+div.social a:hover{
+  color:#CCC;
+}
+
+div.social a{  
+  color:#AAA;
+}
+
+div.search{
+  float:right;
+  width:215px;
 }
 /*EASYAUTOCOMPLETE*/
 
@@ -67,6 +84,7 @@ div.search{
   margin: 0em 0em 0em 1em;
   width: 300px;
   display:inline-block;
+  font-family: "Lato"
 }
 .subtitle{
   margin-left: 2em;
@@ -75,12 +93,14 @@ div.search{
   margin-bottom: 12px;
 }
 #title{
-  font-weight:200;
-  color:#EEE;
+  font-weight:300;
+  color:#E5E5E5;
   font-size: 1.8em;
   margin-bottom: 40px;
+  font-family: "Lato";
 }
 #prizes{
+  font-family: "Lato";
   font-weight:100;
   margin-left: 1em;
 }

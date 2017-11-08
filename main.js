@@ -146,7 +146,7 @@ $("#artsearch").easyAutocomplete(options);
 
       let node = d3.select(this)
 
-      if(selected != null && selected.node() != node.node() && !node.classed('disabled')){
+      if(this != undefined && selected != null && selected.node() != node.node() && !node.classed('disabled')){
 
         circle.classed('selected',false)
         node.classed('selected',true)
